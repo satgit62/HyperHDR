@@ -976,6 +976,9 @@ void HyperAPI::handleProcessingCommand(const QJsonObject& message, const QString
 
 void HyperAPI::handleVideoModeHdrCommand(const QJsonObject& message, const QString& command, int tan)
 {
+	QJsonDocument doc(message);
+	QString strJson(doc.toJson(QJsonDocument::Compact));
+	Debug(_log, "Received new command for HDR mode: %s", QSTRING_CSTR(strJson));
 	if (message.contains("flatbuffers_user_lut_filename"))
 	{
 		BaseAPI::setFlatbufferUserLUT(message["flatbuffers_user_lut_filename"].toString(""));
