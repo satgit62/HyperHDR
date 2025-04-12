@@ -17,6 +17,7 @@ Use -D prefix when configuring the build.
   * ENABLE_PIPEWIRE = ON | OFF, enables the Pipewire software grabber (Linux)
   * ENABLE_PIPEWIRE_EGL = ON | OFF, enables EGL for the Pipewire grabber (Linux)
   * ENABLE_X11 = ON | OFF, enables the X11 software grabber (Linux)
+  * ENABLE_AMLOGIC = ON | OFF, forces the Amlogic software grabber (Linux)
 
 * HARDWARE GRABBERS
   * ENABLE_AVF = ON | OFF, enables the AVF USB grabber support (macOS)
@@ -44,6 +45,7 @@ Use -D prefix when configuring the build.
   * USE_CCACHE_CACHING = ON | OFF, enable CCache support if available
   * USE_SYSTEM_MQTT_LIBS = ON | OFF, prefer system qMQTT libs
   * USE_SYSTEM_FLATBUFFERS_LIBS = ON | OFF, prefer system Flatbuffers libs
+  * USE_SYSTEM_SDBUS_CPP_LIBS = ON | OFF, prefer system sdbus_c++ libs
   * USE_STATIC_QT_PLUGINS = ON | OFF, embed static QT-plugins into the application
   * USE_STANDARD_INSTALLER_NAME = ON | OFF, use standard Linux package naming
 
