@@ -2,7 +2,7 @@ name: HyperHDR CI Build
 
 on:
   push:
-#  pull_request:
+  pull_request:
 
 env:
     USE_CACHE: ${{ vars.USE_CACHE && vars.USE_CACHE || true }}
@@ -109,6 +109,7 @@ jobs:
 
       - name: Clear branch ccache storage
         uses: yumemi-inc/clean-cache-action@v1
+        continue-on-error: true
         with:
           ref: ${{ github.event.ref }}
           key: ${{ matrix.linuxVersion }}-${{ matrix.dockerImage }}-ccache-
@@ -193,6 +194,7 @@ jobs:
 
       - name: Clear branch ccache storage
         uses: yumemi-inc/clean-cache-action@v1
+        continue-on-error: true
         with:
           ref: ${{ github.event.ref }}
           key: macOS-ccache-${{ matrix.NICE_NAME }}
@@ -258,7 +260,13 @@ jobs:
         with:
           path: ${{ runner.workspace }}/Qt
           key: ${{ runner.os }}-Qt.${{ env.QT_VERSION }}
-     
+
+      # temporary workaround for aqt: Python 3.13 instead of preinstalled default older version
+      - name: Python 3.13 for aqtinstall
+        uses: actions/setup-python@v5      
+        with:
+          python-version: '3.13'
+
       - name: Install QT
         if: steps.cache-qt-windows.outputs.cache-hit != 'true'
         run: |          
@@ -285,6 +293,7 @@ jobs:
 
       - name: Clear branch ccache storage
         uses: yumemi-inc/clean-cache-action@v1
+        continue-on-error: true
         with:
           ref: ${{ github.event.ref }}
           key: ${{ runner.os }}-ccache
@@ -396,7 +405,7 @@ jobs:
 
       # Download artifacts from previous build process
       - name: Download artifacts
-        uses: actions/download-artifact@v4.2.1
+        uses: actions/download-artifact@v4.3.0
         with:
           path: artifacts
           pattern: release-artifact-*
@@ -404,7 +413,7 @@ jobs:
 
       # create draft release and upload artifacts
       - name: Create draft release
-        uses: softprops/action-gh-release@v2.2.1
+        uses: softprops/action-gh-release@v2.2.2
         with:
           name: HyperHDR ${{ env.VERSION }}
           tag_name: ${{ env.TAG }}
