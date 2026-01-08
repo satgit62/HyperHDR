@@ -42,13 +42,13 @@ jobs:
             architecture: amd64
 
     steps:   
-      - uses: actions/checkout@v6.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           submodules: true
 
       - name: Download ccache files
         if: env.USE_CACHE == 'true'
-        uses: actions/cache@v4.3.0
+        uses: actions/cache@v5.0.1
         with:
            path: .ccache
            key: ${{ matrix.architecture }}-${{ matrix.distroName }}-${{ matrix.distroVersion }}-ccache-${{ github.run_id }}
@@ -81,7 +81,7 @@ jobs:
           rm -r repo/pool/ArchLinux ||: 
 
       - name: Upload artifacts from commit        
-        uses: actions/upload-artifact@v5.0.0
+        uses: actions/upload-artifact@v6.0.0
         with:
           name: release-artifact-${{ matrix.architecture }}-${{ matrix.distroName }}-${{ matrix.distroVersion }}
           path: repo
@@ -92,11 +92,11 @@ jobs:
     needs: [Linux]
 
     steps:
-      - uses: actions/checkout@v6.0.0
+      - uses: actions/checkout@v6.0.1
         with:
           submodules: false
       - name: Download artifacts
-        uses: actions/download-artifact@v6.0.0
+        uses: actions/download-artifact@v7.0.0
         with:
           path: repo
           pattern: release-artifact-*
@@ -104,7 +104,7 @@ jobs:
       - name: Display structure of artifacts
         run: ls -R repo
       - name: Deploy the packages
-        uses: JamesIves/github-pages-deploy-action@v4.7.4
+        uses: JamesIves/github-pages-deploy-action@v4.7.6
         with:
           repository-name: awawa-dev/awawa-dev.github.io
           branch: upload
