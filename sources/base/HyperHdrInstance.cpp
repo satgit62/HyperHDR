@@ -144,8 +144,7 @@ void HyperHdrInstance::start()
 	_infinite = std::make_unique<CoreInfiniteEngine>(this);
 	_ledGridSize = LedString::getLedLayoutGridSize(getSetting(settings::type::LEDS).array());
 	_currentLedColors = QVector<ColorRgb>(_ledString.leds().size(), ColorRgb::BLACK);
-
-	Info(_log, "Led strip RGB order is: {:s}", (LedString::colorOrderToString(_ledString.colorOrder)));
+	
 
 	connect(_instanceConfig.get(), &InstanceConfig::SignalInstanceSettingsChanged, this, &HyperHdrInstance::SignalInstanceSettingsChanged);
 
@@ -166,7 +165,7 @@ void HyperHdrInstance::start()
 
 	_ledDeviceWrapper = std::make_unique<LedDeviceWrapper>(this);
 	connect(this, &HyperHdrInstance::SignalRequestComponent, _ledDeviceWrapper.get(), &LedDeviceWrapper::handleComponentState);
-	_ledDeviceWrapper->createLedDevice(ledDevice, _infinite->getSuggestedInterval(), _disableOnStartup);
+	_ledDeviceWrapper->createLedDevice(ledDevice, _infinite->getSuggestedInterval(), _infinite->getAntiFlickeringFilterState(), _disableOnStartup);
 
 	// create the effect engine; needs to be initialized after smoothing!
 	_effectEngine = std::make_unique<EffectEngine>(this);
@@ -236,17 +235,9 @@ void HyperHdrInstance::handleSettingsUpdate(settings::type type, const QJsonDocu
 		// handle hwLedCount update
 		_hwLedCount = qMax(dev["hardwareLedCount"].toInt(1), getLedCount());
 
-		// force ledString update, if device ByteOrder changed
-		if (_ledString.colorOrder != LedString::stringToColorOrder(dev["colorOrder"].toString("rgb")))
-		{
-			Info(_log, "New RGB order is: {:s}", (dev["colorOrder"].toString("rgb")));
-			_ledString = LedString::createLedString(getSetting(settings::type::LEDS).array(), LedString::createColorOrder(dev));
-			_imageProcessor->setLedString(_ledString);
-		}
-
 		// do always reinit until the led devices can handle dynamic changes
 		dev["currentLedCount"] = _hwLedCount; // Inject led count info
-		_ledDeviceWrapper->createLedDevice(dev, _infinite->getSuggestedInterval(), false);
+		_ledDeviceWrapper->createLedDevice(dev, _infinite->getSuggestedInterval(), _infinite->getAntiFlickeringFilterState(), false);
 	}
 	else if (type == settings::type::BGEFFECT || type == settings::type::FGEFFECT)
 	{

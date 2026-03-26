@@ -2,7 +2,7 @@
 *
 *  MIT License
 *
-*  Copyright (c) 2020-2025 awawa-dev
+*  Copyright (c) 2020-2026 awawa-dev
 *
 *  Project homesite: https://github.com/awawa-dev/HyperHDR
 *
@@ -81,11 +81,12 @@ InfiniteProcessing::InfiniteProcessing() :
 {
 }
 
-InfiniteProcessing::InfiniteProcessing(const QJsonDocument& config, const LoggerName& log) :
+InfiniteProcessing::InfiniteProcessing(const QJsonDocument& colorConfig, const QJsonDocument& deviceConfig, const LoggerName& log) :
 	InfiniteProcessing()
 {
 	_log = log;
-	handleSignalInstanceSettingsChanged(settings::type::COLOR, config);
+	handleSignalInstanceSettingsChanged(settings::type::DEVICE, deviceConfig);
+	handleSignalInstanceSettingsChanged(settings::type::COLOR, colorConfig);
 }
 
 void InfiniteProcessing::setProcessingEnabled(bool enabled)
@@ -163,7 +164,13 @@ void InfiniteProcessing::handleSignalInstanceSettingsChanged(settings::type type
 {
 	if (type == settings::type::DEVICE)
 	{
-		_colorOrder = LedString::stringToColorOrder(config["colorOrder"].toString("rgb"));
+		if (config["enable_ice_rgbw"].toBool(false)) {
+			_colorOrder = LedString::ColorOrder::ORDER_RGB;
+			Info(_log, "RGBW dithering is using own color order - switching internal mixer to default {:s}", LedString::colorOrderToString(_colorOrder) );
+		} else {
+			_colorOrder = LedString::stringToColorOrder(config["colorOrder"].toString("rgb"));
+			Info(_log, "Current active RGB order is: {:s}", LedString::colorOrderToString(_colorOrder));
+		}
 	}
 	else if (type == settings::type::COLOR)
 	{
@@ -228,6 +235,11 @@ void InfiniteProcessing::applyyAllProcessingSteps(std::vector<linalg::vec<float,
 			}
 		}
 	}
+}
+
+std::optional<float> InfiniteProcessing::getMinimalBacklight()
+{
+	return _minimalBacklight;
 }
 
 void InfiniteProcessing::setMinimalBacklight(float minimalLevel, bool coloreBacklight)
@@ -530,9 +542,9 @@ void InfiniteProcessing::setTemperature(TemperaturePreset preset, linalg::vec<fl
 		Info(_log, "--- TEMPERATURE (ENABLED: {:s}) ---", ((_temperature_tint.has_value()) ? "true" : "false"));
 		if (_temperature_tint.has_value())
 		{
-			Info(_log, "RED:     %0.3f", _temperature_tint.value().x);
-			Info(_log, "GREEN:   %0.3f", _temperature_tint.value().y);
-			Info(_log, "BLUE:    %0.3f", _temperature_tint.value().z);
+			Info(_log, "RED:     {:0.3f}", _temperature_tint.value().x);
+			Info(_log, "GREEN:   {:0.3f}", _temperature_tint.value().y);
+			Info(_log, "BLUE:    {:0.3f}", _temperature_tint.value().z);
 		}
 	}
 }
@@ -565,8 +577,8 @@ void InfiniteProcessing::setBrightnessAndSaturation(float brightness, float satu
 		Info(_log, "--- HSV CORRECTION (ENABLED: {:s}) ---", ((enabled) ? "true" : "false"));
 		if (enabled)
 		{
-			Info(_log, "BRIGHTNESS: %0.3f", _brightness.value());
-			Info(_log, "SATURATION: %0.3f", _saturation.value());
+			Info(_log, "BRIGHTNESS: {:0.3f}", _brightness.value());
+			Info(_log, "SATURATION: {:0.3f}", _saturation.value());
 		}
 	}
 }
@@ -600,7 +612,7 @@ void InfiniteProcessing::setScaleOutput(float scaleOutput)
 		Info(_log, "--- SCALE OUTPUT (ENABLED: {:s}) ---", ((_scaleOutput.has_value()) ? "true" : "false"));
 		if (_scaleOutput.has_value())
 		{
-			Info(_log, "SCALE:   %0.3f", _scaleOutput.value());
+			Info(_log, "SCALE:   {:0.3f}", _scaleOutput.value());
 		}
 	}
 }
@@ -626,7 +638,7 @@ void InfiniteProcessing::setPowerLimit(float powerLimit)
 		Info(_log, "--- POWER LIMIT (ENABLED: {:s}) ---", ((_powerLimit.has_value()) ? "true" : "false"));
 		if (_powerLimit.has_value())
 		{
-			Info(_log, "LIMIT:   %0.3f", _powerLimit.value());
+			Info(_log, "LIMIT:   {:0.3f}", _powerLimit.value());
 		}
 	}
 }

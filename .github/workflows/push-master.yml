@@ -2,6 +2,7 @@ name: HyperHDR CI Build
 
 on:
   push:
+  pull_request:
 
 env:
     USE_CACHE: ${{ vars.USE_CACHE && vars.USE_CACHE || true }}
@@ -43,13 +44,13 @@ jobs:
             architecture: amd64
 
     steps:   
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
         with:
           submodules: true
 
       - name: Download ccache files
         if: env.USE_CACHE == 'true'
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.3
         with:
            path: .ccache
            key: ${{ matrix.architecture }}-${{ matrix.distroName }}-${{ matrix.distroVersion }}-ccache-${{ github.run_id }}
@@ -74,22 +75,22 @@ jobs:
 
       - name: Clear branch ccache storage
         if: startsWith(github.event.ref, 'refs/tags') == false
-        uses: yumemi-inc/clean-cache-action@v1
         continue-on-error: true
-        with:
-          ref: ${{ github.event.ref }}
-          key: ${{ matrix.architecture }}-${{ matrix.distroName }}-${{ matrix.distroVersion }}-ccache-
+        run: |
+          gh cache list --ref ${{ github.event.ref }} --key "${{ matrix.architecture }}-${{ matrix.distroName }}-${{ matrix.distroVersion }}-ccache-" --limit 100 --json id --jq '.[].id' | xargs -r -n1 gh cache delete
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload artifacts (release)
         if: startsWith(github.event.ref, 'refs/tags') && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: release-artifact-${{ matrix.architecture }}-${{ matrix.distroName }}-${{ matrix.distroVersion }}
           path: deploy/Hyper*
 
       - name: Upload artifacts from commit
         if: startsWith(github.event.ref, 'refs/tags') == false && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: Linux-${{ matrix.architecture }}-${{ matrix.distroName }}-${{ matrix.distroVersion }}-installer
           path: |
@@ -115,13 +116,13 @@ jobs:
             NICE_NAME: x64
     steps:
       # Checkout
-      - uses: actions/checkout@v6.0.1
+      - uses: actions/checkout@v6.0.2
         with:
             submodules: true
 
       - name: Download ccache files
         if: env.USE_CACHE == 'true'
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.3
         with:
             path: build/.ccache
             key: macOS-${{ matrix.NICE_NAME }}-ccache-${{ github.run_id }}
@@ -142,22 +143,22 @@ jobs:
         run: ./build.sh || ./build.sh
 
       - name: Clear branch ccache storage
-        uses: yumemi-inc/clean-cache-action@v1
         continue-on-error: true
-        with:
-          ref: ${{ github.event.ref }}
-          key: macOS-${{ matrix.NICE_NAME }}-ccache
+        run: |
+          gh cache list --ref ${{ github.event.ref }} --key "macOS-${{ matrix.NICE_NAME }}-ccache" --limit 100 --json id --jq '.[].id' | xargs -r -n1 gh cache delete
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload artifacts (release)
         if: startsWith(github.event.ref, 'refs/tags') && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
             name: release-artifact-${{ matrix.JOB_RUNNER }}      
             path: build/Hyper*.dmg
 
       - name: Upload artifacts from commit
         if: startsWith(github.event.ref, 'refs/tags') == false && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
             name: Apple_macOS_${{ matrix.NICE_NAME }}_DMG_installer
             path: build/Hyper*.dmg
@@ -175,12 +176,12 @@ jobs:
       TOOLKIT_DIR: "${{ github.workspace }}\\Toolkit"
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
         with:
           submodules: true
 
       - name: Cache Toolkit
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.3
         id: cache-toolkit-windows
         with:
           path: ${{ env.TOOLKIT_DIR }}
@@ -213,7 +214,7 @@ jobs:
 
       - name: Download ccache files
         if: env.USE_CACHE == 'true'
-        uses: actions/cache@v5.0.1
+        uses: actions/cache@v5.0.3
         with:
             path: build/.ccache
             key: ${{ runner.os }}-ccache-${{ github.run_id }}
@@ -231,22 +232,22 @@ jobs:
           ./build.sh
 
       - name: Clear branch ccache storage
-        uses: yumemi-inc/clean-cache-action@v1
         continue-on-error: true
-        with:
-          ref: ${{ github.event.ref }}
-          key: ${{ runner.os }}-ccache
+        run: |
+          gh cache list --ref ${{ github.event.ref }} --key "${{ runner.os }}-ccache" --limit 100 --json id --jq '.[].id' | xargs -r -n1 gh cache delete
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload artifacts (release)
         if: startsWith(github.event.ref, 'refs/tags') && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: release-artifact-windows
           path: build/Hyper*
           
       - name: Upload artifacts from commit
         if: startsWith(github.event.ref, 'refs/tags') == false && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: Windows_x64_setup
           path: build/Hyper*.exe
@@ -272,7 +273,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
         if: env.USE_CODEQL == 'true'
         with:
           submodules: true
@@ -298,7 +299,7 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
         with:
           submodules: true
 
@@ -344,7 +345,7 @@ jobs:
           pandoc report.md -f markdown -t html -s -o cpp_report.html
 
       - name: Upload report artifact
-        uses: actions/upload-artifact@v6.0.0
+        uses: actions/upload-artifact@v7.0.0
         with:
           name: static-cpp-analysis-report
           path: |
@@ -365,7 +366,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6.0.1
+        uses: actions/checkout@v6.0.2
 
       - name: Generate environment variables from version and tag
         run: |
@@ -378,7 +379,7 @@ jobs:
         run: echo "preRelease=true" >> $GITHUB_ENV
 
       - name: Download artifacts
-        uses: actions/download-artifact@v7.0.0
+        uses: actions/download-artifact@v8.0.0
         with:
           path: artifacts
           pattern: release-artifact-*

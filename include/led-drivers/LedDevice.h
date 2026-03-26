@@ -25,6 +25,7 @@
 #include <led-drivers/ColorRgbw.h>
 #include <performance-counters/PerformanceCounters.h>
 #include <infinite-color-engine/SharedOutputColors.h>
+#include <base/LedString.h>
 
 class LedDevice;
 class DiscoveryWrapper;
@@ -70,7 +71,7 @@ public slots:
 	virtual bool switchOn();
 	virtual bool switchOff();
 	void blinking(QJsonObject params);
-	void smoothingRestarted(int newSmoothingInterval);
+	void smoothingRestarted(int newSmoothingInterval, bool antiflickeringfilter);
 	int hasLedClock();
 	void pauseRetryTimer(bool mode);
 
@@ -108,6 +109,7 @@ protected:
 	std::vector<uint8_t> _ledBuffer;
 	QTimer* _refreshTimer;
 
+	LedString::ColorOrder _colorOrder;
 	int _currentInterval;
 	int _defaultInterval;
 	int _forcedInterval;
@@ -125,6 +127,7 @@ protected:
 	bool _isOn;
 	bool _isDeviceInError;
 
+	bool	_antiFlickeringFilter;
 	int		_maxRetry;
 	int		_currentRetry;
 	QString _customInfo;
@@ -145,6 +148,7 @@ private:
 	std::atomic_bool	_isRefreshEnabled;
 	std::atomic_bool	_newFrame2Send;
 	SharedOutputColors	_lastLedValues;
+	SharedOutputColors	_lastFinityLedValues;
 
 	struct LedStats
 	{

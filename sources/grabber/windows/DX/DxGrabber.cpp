@@ -99,7 +99,7 @@ void DxGrabber::setHdrToneMappingEnabled(int mode)
 	{
 		_hdrToneMappingEnabled = mode;
 		if (_lut.data() != nullptr || !mode)
-			Debug(_log, "setHdrToneMappingMode to: {:s}", (mode == 0) ? "Disabled" : ((mode == 1) ? "Fullscreen" : "Border mode"));
+			Debug(_log, "setHdrToneMappingMode to: {:s}", (mode == 0) ? "Disabled" : "Enabled");
 		else
 			Warning(_log, "setHdrToneMappingMode to: enable, but the LUT file is currently unloaded");
 
@@ -107,7 +107,7 @@ void DxGrabber::setHdrToneMappingEnabled(int mode)
 		loadLutFile(PixelFormat::RGB24);
 	}
 	else
-		Debug(_log, "setHdrToneMappingMode nothing changed: {:s}", (mode == 0) ? "Disabled" : ((mode == 1) ? "Fullscreen" : "Border mode"));
+		Debug(_log, "setHdrToneMappingMode nothing changed: {:s}", (mode == 0) ? "Disabled" : "Enabled");
 }
 
 DxGrabber::~DxGrabber()
@@ -388,7 +388,7 @@ bool DxGrabber::initDirectX(QString selectedDeviceName)
 						pOutput6->GetDesc1(&descGamut);
 
 						display->wideGamut = descGamut.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020;
-						Info(_log, "Gamut: {:s}, min nits: %0.2f, max nits: %0.2f, max frame nits: %0.2f, white point: [%0.2f, %0.2f]",
+						Info(_log, "Gamut: {:s}, min nits: {:0.2f}, max nits: {:0.2f}, max frame nits: {:0.2f}, white point: [{:0.2f}, {:0.2f}]",
 									std::string_view((display->wideGamut) ? "HDR" : "SDR"), descGamut.MinLuminance, descGamut.MaxLuminance, descGamut.MaxFullFrameLuminance,
 									descGamut.WhitePoint[0], descGamut.WhitePoint[1]);
 
