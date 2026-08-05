@@ -2,7 +2,7 @@
 *
 *  MIT License
 *
-*  Copyright (c) 2020-2025 awawa-dev
+*  Copyright (c) 2020-2026 awawa-dev
 *
 *  Project homesite: https://github.com/awawa-dev/HyperHDR
 *
@@ -60,12 +60,12 @@ void InfiniteRgbInterpolator::resetToColors(std::vector<float3> colors)
 	_isAnimationComplete = true;
 }
 
-void InfiniteRgbInterpolator::setTargetColors(std::vector<float3>&& new_rgb_targets, float startTimeMs, bool debug)
+void InfiniteRgbInterpolator::setTargetColors(std::vector<float3>&& new_rgb_targets, long long startTimeMs, bool debug)
 {
 	if (new_rgb_targets.empty())
 		return;
 
-	const float delta = (!_isAnimationComplete) ? std::clamp(startTimeMs - _lastUpdate, 0.f, 100.0f) : 0.f;
+	const float delta = (!_isAnimationComplete) ? std::clamp(static_cast<float>(startTimeMs - _lastUpdate), 0.f, 100.0f) : 0.f;
 
 	if (debug)
 	{
@@ -106,12 +106,19 @@ void InfiniteRgbInterpolator::setTargetColors(std::vector<float3>&& new_rgb_targ
 	_targetTime = startTimeMs + _initialDuration;
 }
 
+void InfiniteRgbInterpolator::resetState() {
+	_isAnimationComplete = true;
+	_lastUpdate = 0;
+	_currentColorsRGB.clear();
+	_targetColorsRGB.clear();
+}
+
 void InfiniteRgbInterpolator::setSmoothingFactor(float factor)
 {
 	_smoothingFactor = std::max(0.0f, std::min(factor, 1.0f));
 }
 
-void InfiniteRgbInterpolator::updateCurrentColors(float currentTimeMs, float minBrightness)
+void InfiniteRgbInterpolator::updateCurrentColors(long long currentTimeMs, float /*minBrightness*/)
 {
 	if (_isAnimationComplete)
 	{
@@ -138,7 +145,7 @@ void InfiniteRgbInterpolator::updateCurrentColors(float currentTimeMs, float min
 	// limits[2] = 60/255  => stary limitMax
 
 	auto computeChannelVec = [&](float3& cur, const float3& diff) -> bool {
-		const float FINISH_COMPONENT_THRESHOLD = 0.2f / 255.0f;
+		constexpr float FINISH_COMPONENT_THRESHOLD = 0.0013732906f / 10.f;
 
 		float val = linalg::maxelem(linalg::abs(diff));
 

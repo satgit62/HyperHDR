@@ -2,7 +2,7 @@
 *
 *  MIT License
 *
-*  Copyright (c) 2020-2025 awawa-dev
+*  Copyright (c) 2020-2026 awawa-dev
 *
 *  Project homesite: https://github.com/awawa-dev/HyperHDR
 *
@@ -60,7 +60,7 @@ void InfiniteExponentialInterpolator::resetToColors(std::vector<float3>&& colors
 	setTargetColors(std::move(colors), startTimeMs);
 }
 
-void InfiniteExponentialInterpolator::setTargetColors(std::vector<float3>&& new_rgb_targets, float startTimeMs, bool debug)
+void InfiniteExponentialInterpolator::setTargetColors(std::vector<float3>&& new_rgb_targets, long long startTimeMs, bool debug)
 {
 	if (new_rgb_targets.empty())
 		return;
@@ -87,7 +87,14 @@ void InfiniteExponentialInterpolator::setTargetColors(std::vector<float3>&& new_
 	_targetTime = startTimeMs + _initialDuration;
 }
 
-void InfiniteExponentialInterpolator::updateCurrentColors(float currentTimeMs, float minBrightness)
+void InfiniteExponentialInterpolator::resetState() {
+	_isAnimationComplete = true;
+	_lastUpdate = 0;
+	_currentColorsRGB.clear();
+	_targetColorsRGB.clear();
+}
+
+void InfiniteExponentialInterpolator::updateCurrentColors(long long currentTimeMs, float /*minBrightness*/)
 {
 	if (_isAnimationComplete)
 	{
@@ -112,7 +119,7 @@ void InfiniteExponentialInterpolator::updateCurrentColors(float currentTimeMs, f
 	// limits[2] = 60/255  => stary limitMax
 
 	auto computeChannelVec = [&](float3& cur, const float3& diff) -> bool {
-		const float FINISH_COMPONENT_THRESHOLD = 0.2f / 255.0f;
+		constexpr float FINISH_COMPONENT_THRESHOLD = 0.0013732906f / 10.f;
 
 		float val = linalg::maxelem(linalg::abs(diff));
 

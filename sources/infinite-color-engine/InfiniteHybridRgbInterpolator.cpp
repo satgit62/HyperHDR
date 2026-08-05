@@ -2,7 +2,7 @@
 *
 *  MIT License
 *
-*  Copyright (c) 2020-2025 awawa-dev
+*  Copyright (c) 2020-2026 awawa-dev
 *
 *  Project homesite: https://github.com/awawa-dev/HyperHDR
 *
@@ -70,11 +70,11 @@ void InfiniteHybridRgbInterpolator::resetToColors(std::vector<float3> colors, fl
 	setTargetColors(std::move(colors), startTimeMs);
 }
 
-void InfiniteHybridRgbInterpolator::setTargetColors(std::vector<float3>&& new_rgb_targets, float startTimeMs, bool debug) {
+void InfiniteHybridRgbInterpolator::setTargetColors(std::vector<float3>&& new_rgb_targets, long long startTimeMs, bool debug) {
 	if (new_rgb_targets.empty())
 		return;
 
-	const float delta = (!_isAnimationComplete) ? std::clamp(startTimeMs - _lastUpdate, 0.f, 100.0f) : 0.f;
+	const float delta = (!_isAnimationComplete) ? std::clamp(static_cast<float>(startTimeMs - _lastUpdate), 0.f, 100.0f) : 0.f;
 
 	if (debug)
 	{
@@ -116,25 +116,33 @@ void InfiniteHybridRgbInterpolator::setTargetColors(std::vector<float3>&& new_rg
 	_targetTime = startTimeMs + _initialDuration;
 }
 
-void InfiniteHybridRgbInterpolator::updateCurrentColors(float currentTimeMs, float minBrightness) {
+void InfiniteHybridRgbInterpolator::resetState() {
+	_isAnimationComplete = true;
+	_lastUpdate = 0;
+	_targetColorsRGB.clear();
+	_currentColorsRGB.clear();
+	_velocitiesRGB.clear();
+}
+
+void InfiniteHybridRgbInterpolator::updateCurrentColors(long long currentTimeMs, float minBrightness) {
 	if (_isAnimationComplete)
 	{
 		_lastUpdate = currentTimeMs;
 		return;
 	}
 
-	float dt = std::clamp(currentTimeMs - _lastUpdate, 0.001f, 100.0f);
+	float dt = std::clamp(static_cast<float>(currentTimeMs - _lastUpdate), 0.001f, 100.0f);
 	_lastUpdate = currentTimeMs;
 
 	auto computeChannelVec = [&](float3& cur, const float3& tgt, const float3& diff, float3& vel) -> bool {
-		const float FINISH_COMPONENT_THRESHOLD = 0.0013732906f / 10.f;
-		const float VELOCITY_THRESHOLD = 0.0005f;
+		constexpr float FINISH_COMPONENT_THRESHOLD = 0.0013732906f / 10.f;
+		constexpr float VELOCITY_THRESHOLD = 0.0005f;
 
 		if (linalg::maxelem(linalg::abs(diff)) < FINISH_COMPONENT_THRESHOLD && // color match
 			linalg::maxelem(linalg::abs(vel)) < VELOCITY_THRESHOLD) // speed should be almost zero
 		{
 			cur = tgt;
-			vel = float3{ 0,0,0 };
+			vel = float3{ 0.f, 0.f, 0.f };
 			return false;
 		}
 		else
