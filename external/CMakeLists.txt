@@ -85,6 +85,7 @@ endif()
 
 if(ENABLE_WS281XPWM)
 	file(READ "${CMAKE_CURRENT_SOURCE_DIR}/rpi_ws281x/CMakeLists.txt" FILE_CONTENTS)
+	string(REPLACE "cmake_minimum_required(VERSION 3.0.0)" "cmake_minimum_required(VERSION 3.5.0)" FILE_CONTENTS "${FILE_CONTENTS}")
 	string(REPLACE "if(BUILD_SHARED)" "if(USE_SHARED_LIBS AND ENABLE_DEPENDENCY_PACKAGING)" FILE_CONTENTS "${FILE_CONTENTS}")
 	if(NOT USE_PRECOMPILED_HEADERS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/rpi_ws281x/version")
 		message("Renaming ws281x version file to avoid conflicts with c++20")
@@ -321,26 +322,6 @@ if ( ENABLE_ZSTD )
 		add_library(zstd::zstd ALIAS libzstd)
 	endif()
 ENDIF()
-
-#=============================================================================
-# sdbus-cpp
-#=============================================================================
-
-if (UNIX AND NOT APPLE AND (ENABLE_POWER_MANAGEMENT OR ENABLE_PIPEWIRE))
-	if (USE_SYSTEM_SDBUS_CPP_LIBS)
-		pkg_check_modules (sdbus-c++ sdbus-c++>=2.0.0)
-
-		if(NOT sdbus-c++_FOUND)
-			message( WARNING "Could not find: sdbus-c++>=2.0.0. Fallback to sdbus-c++ submodule." )
-		endif()
-	endif()
-
-	if(NOT sdbus-c++_FOUND)
-		message( "Using sdbus-c++ submodule." )
-		set(SDBUSCPP_BUILD_DOCS OFF CACHE BOOL "No doc")
-		add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/sdbus-cpp)
-	endif()
-endif()
 
 #=============================================================================
 # STB
