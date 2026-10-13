@@ -67,7 +67,20 @@ private:
 
 	bool _continuousOutput;
 
-	enum class SmoothingType { Stepper = 0, RgbInterpolator = 1, YuvInterpolator = 2, HybridInterpolator = 3, ExponentialInterpolator = 4, HybridRgbInterpolator = 5};
+	enum class SmoothingType {
+		Stepper = 0,
+		RgbInterpolator = 1,
+		YuvInterpolator = 2,
+		HybridInterpolator = 3,
+		ExponentialInterpolator = 4,
+		HybridRgbInterpolator = 5,
+		PerceptualInterpolator = 6,
+		AdaptiveEma = 7,
+		Kalman = 8,
+		LumaChroma = 9,
+		PredictiveSpring = 10,
+		MedianEma = 11
+	};
 	static QString EnumSmoothingTypeToString(SmoothingType type);
 	static SmoothingType StringToEnumSmoothingType(QString name);
 
@@ -81,6 +94,7 @@ private:
 		float		  stiffness;
 		float		  damping;
 		float		  y_limit;
+		float         spatialStrength = 0.0f;
 	};
 
 	std::vector<std::unique_ptr<SmoothingConfig>> _configurations;
