@@ -16,10 +16,29 @@
 		{
 			"type" : "string",
 			"title" : "edt_conf_smooth_type_title",
-			"enum" : ["Stepper", "YuvInterpolator", "RgbInterpolator", "HybridInterpolator", "HybridRgbInterpolator", "ExponentialInterpolator"],
+			"enum" : [
+				"Stepper", "YuvInterpolator", "RgbInterpolator",
+				"HybridInterpolator", "HybridRgbInterpolator",
+				"ExponentialInterpolator", "PerceptualInterpolator",
+				"AdaptiveEma", "Kalman", "LumaChroma",
+				"PredictiveSpring", "MedianEma"
+			],
 			"default" : "HybridRgbInterpolator",
 			"options" : {
-				"enum_titles" : ["edt_conf_enum_interpolator_Stepper_title", "edt_conf_enum_interpolator_YuvInterpolator_title", "edt_conf_enum_interpolator_RgbInterpolator_title", "edt_conf_enum_interpolator_HybridInterpolator_title", "edt_conf_enum_interpolator_HybridRgbInterpolator_title", "edt_conf_enum_interpolator_ExponentialInterpolator_title"]
+				"enum_titles" : [
+					"edt_conf_enum_interpolator_Stepper_title",
+					"edt_conf_enum_interpolator_YuvInterpolator_title",
+					"edt_conf_enum_interpolator_RgbInterpolator_title",
+					"edt_conf_enum_interpolator_HybridInterpolator_title",
+					"edt_conf_enum_interpolator_HybridRgbInterpolator_title",
+					"edt_conf_enum_interpolator_ExponentialInterpolator_title",
+					"edt_conf_enum_interpolator_PerceptualInterpolator_title",
+					"edt_conf_enum_interpolator_AdaptiveEma_title",
+					"edt_conf_enum_interpolator_Kalman_title",
+					"edt_conf_enum_interpolator_LumaChroma_title",
+					"edt_conf_enum_interpolator_PredictiveSpring_title",
+					"edt_conf_enum_interpolator_MedianEma_title"
+				]
 			},
 			"required" : true,
 			"propertyOrder" : 2
@@ -27,8 +46,8 @@
 		"time_ms" :
 		{
 			"type" : "integer",
-			"format": "stepper",			
-			"step" : 25,			
+			"format": "stepper",
+			"step" : 25,
 			"title" : "edt_conf_smooth_time_ms_title",
 			"minimum" : 25,
 			"maximum": 5000,
@@ -40,8 +59,8 @@
 		"updateFrequency" :
 		{
 			"type" : "number",
-			"format": "stepper",			
-			"step" : 5,			
+			"format": "stepper",
+			"step" : 5,
 			"title" : "edt_conf_smooth_updateFrequency_title",
 			"minimum" : 20.0,
 			"maximum" : 200.0,
@@ -53,8 +72,8 @@
 		"smoothingFactor" :
 		{
 			"type" : "number",
-			"format": "stepper",			
-			"step" : 0.05,			
+			"format": "stepper",
+			"step" : 0.05,
 			"title" : "edt_conf_enum_interpolator_smoothingFactor_title",
 			"minimum" : 0.0,
 			"maximum" : 1.0,
@@ -62,7 +81,15 @@
 			"required" : true,
 			"options": {
 				"dependencies": {
-					"type": ["YuvInterpolator", "RgbInterpolator", "HybridRgbInterpolator"]
+					"type": [
+						"YuvInterpolator",
+						"RgbInterpolator",
+						"HybridRgbInterpolator",
+						"PerceptualInterpolator",
+						"AdaptiveEma",
+						"LumaChroma",
+						"MedianEma"
+					]
 				}
 			},
 			"propertyOrder" : 5
@@ -70,8 +97,8 @@
 		"stiffness" :
 		{
 			"type" : "integer",
-			"format": "stepper",			
-			"step" : 10,			
+			"format": "stepper",
+			"step" : 10,
 			"title" : "edt_conf_enum_interpolator_stiffness_title",
 			"minimum" : 0,
 			"maximum": 1000,
@@ -79,7 +106,13 @@
 			"required" : true,
 			"options": {
 				"dependencies": {
-					"type": ["HybridInterpolator", "HybridRgbInterpolator"]
+					"type": [
+						"HybridInterpolator",
+						"HybridRgbInterpolator",
+						"PerceptualInterpolator",
+						"PredictiveSpring",
+						"Kalman"
+					]
 				}
 			},
 			"propertyOrder" : 6
@@ -87,7 +120,7 @@
 		"damping" :
 		{
 			"type" : "integer",
-			"format": "stepper",			
+			"format": "stepper",
 			"step" : 2,
 			"title" : "edt_conf_enum_interpolator_damping_title",
 			"minimum" : 0,
@@ -96,7 +129,13 @@
 			"required" : true,
 			"options": {
 				"dependencies": {
-					"type": ["HybridInterpolator", "HybridRgbInterpolator"]
+					"type": [
+						"HybridInterpolator",
+						"HybridRgbInterpolator",
+						"PerceptualInterpolator",
+						"PredictiveSpring",
+						"Kalman"
+					]
 				}
 			},
 			"propertyOrder" : 7
@@ -104,8 +143,8 @@
 		"y_limit" :
 		{
 			"type" : "number",
-			"format": "stepper",			
-			"step" : 0.01,			
+			"format": "stepper",
+			"step" : 0.01,
 			"title" : "edt_conf_enum_interpolator_y_limit_title",
 			"minimum" : 0.0,
 			"maximum" : 1.0,
@@ -113,10 +152,30 @@
 			"required" : true,
 			"options": {
 				"dependencies": {
-					"type": ["YuvInterpolator", "HybridInterpolator"]
+					"type": [
+						"YuvInterpolator",
+						"HybridInterpolator"
+					]
 				}
 			},
 			"propertyOrder" : 8
+		},
+		"spatialStrength" :
+		{
+			"type" : "number",
+			"format": "stepper",
+			"step" : 0.05,
+			"title" : "edt_conf_enum_interpolator_spatialStrength_title",
+			"minimum" : 0.0,
+			"maximum" : 0.45,
+			"default" : 0.0,
+			"required" : true,
+			"options": {
+				"dependencies": {
+					"type": ["PerceptualInterpolator"]
+				}
+			},
+			"propertyOrder" : 9
 		},
 		"antiFlickeringFilter" :
 		{
@@ -125,7 +184,7 @@
 			"title" : "edt_conf_smooth_antiFlickeringFilter_title",
 			"default" : true,
 			"required" : true,
-			"propertyOrder" : 9
+			"propertyOrder" : 10
 		},
 		"continuousOutput" :
 		{
@@ -134,7 +193,7 @@
 			"title" : "edt_conf_smooth_continuousOutput_title",
 			"default" : false,
 			"required" : true,
-			"propertyOrder" : 10
+			"propertyOrder" : 11
 		}
 	},
 	"additionalProperties" : false
