@@ -79,7 +79,8 @@ private:
 		Kalman = 8,
 		LumaChroma = 9,
 		PredictiveSpring = 10,
-		MedianEma = 11
+		MedianEma = 11,
+		Kinetic = 12
 	};
 	static QString EnumSmoothingTypeToString(SmoothingType type);
 	static SmoothingType StringToEnumSmoothingType(QString name);
@@ -95,6 +96,8 @@ private:
 		float		  damping;
 		float		  y_limit;
 		float         spatialStrength = 0.0f;
+		float		  chromaBoost = 0.20f;
+		float		  lookahead = 40.0f;
 	};
 
 	std::vector<std::unique_ptr<SmoothingConfig>> _configurations;

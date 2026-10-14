@@ -12,8 +12,8 @@
 
 /**
  * Predictive spring with lookahead. Estimates the target's velocity and
- * predicts where it will be in a few ms, removing the lag that plain
- * springs show while keeping smoothness (no overshoot).
+ * predicts where it will be in a few milliseconds, removing the lag that
+ * plain springs show while keeping smoothness (no overshoot).
  */
 class InfinitePredictiveSpringInterpolator : public InfiniteInterpolator
 {
@@ -29,6 +29,12 @@ public:
 	void setTransitionDuration(float durationMs) override;
 	void setSpringiness(float stiffness, float damping) override;
 
+	// Lookahead: how far into the future the spring predicts the target.
+	//   0 ms   -> plain spring (no anticipation)
+	//   40 ms  -> default, good compromise
+	//   80 ms+ -> aggressive, faster reaction but risk of overshoot
+	void setLookahead(float lookaheadMs);
+
 	void resetToColors(std::vector<linalg::aliases::float3> colors, long long startTimeMs);
 	static void test();
 
@@ -40,7 +46,7 @@ private:
 
 	float _stiffness    = 180.0f;
 	float _damping      = 26.0f;
-	float _lookaheadSec = 0.04f;
+	float _lookaheadSec = 0.040f;   // default 40 ms
 	long long _lastUpdate  = 0;
 	long long _lastTargetT = 0;
 };
