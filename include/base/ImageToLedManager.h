@@ -59,10 +59,14 @@ private slots:
 
 private:
 	quint8		_instanceIndex;
-	LoggerName	_log;	
+	LoggerName	_log;
 	LedString	_ledString;
 	hyperhdr::BlackBorderProcessor* _borderProcessor;
 	std::unique_ptr<hyperhdr::ImageColorAveraging> _colorAveraging;
 	int		_mappingType;
 	bool	_sparseProcessing;
+
+	// Tunable parameters for the "dominant", "oklab", "kmeans" and
+	// "multisample" mapping types. Populated from schema-color.json.
+	hyperhdr::MappingParams _mappingParams;
 };
