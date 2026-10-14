@@ -21,7 +21,7 @@
 				"HybridInterpolator", "HybridRgbInterpolator",
 				"ExponentialInterpolator", "PerceptualInterpolator",
 				"AdaptiveEma", "Kalman", "LumaChroma",
-				"PredictiveSpring", "MedianEma"
+				"PredictiveSpring", "MedianEma", "Kinetic"
 			],
 			"default" : "HybridRgbInterpolator",
 			"options" : {
@@ -37,7 +37,8 @@
 					"edt_conf_enum_interpolator_Kalman_title",
 					"edt_conf_enum_interpolator_LumaChroma_title",
 					"edt_conf_enum_interpolator_PredictiveSpring_title",
-					"edt_conf_enum_interpolator_MedianEma_title"
+					"edt_conf_enum_interpolator_MedianEma_title",
+					"edt_conf_enum_interpolator_Kinetic_title"
 				]
 			},
 			"required" : true,
@@ -88,7 +89,8 @@
 						"PerceptualInterpolator",
 						"AdaptiveEma",
 						"LumaChroma",
-						"MedianEma"
+						"MedianEma",
+						"Kinetic"
 					]
 				}
 			},
@@ -172,10 +174,45 @@
 			"required" : true,
 			"options": {
 				"dependencies": {
-					"type": ["PerceptualInterpolator"]
+					"type": ["PerceptualInterpolator", "Kinetic"]
 				}
 			},
 			"propertyOrder" : 9
+		},
+		"chromaBoost" :
+		{
+			"type" : "number",
+			"format": "stepper",
+			"step" : 0.05,
+			"title" : "edt_conf_enum_interpolator_chromaBoost_title",
+			"minimum" : 0.0,
+			"maximum" : 0.5,
+			"default" : 0.20,
+			"required" : true,
+			"options": {
+				"dependencies": {
+					"type": ["Kinetic"]
+				}
+			},
+			"propertyOrder" : 10
+		},
+		"lookahead" :
+		{
+			"type" : "number",
+			"format": "stepper",
+			"step" : 5,
+			"title" : "edt_conf_enum_interpolator_lookahead_title",
+			"minimum" : 0,
+			"maximum" : 200,
+			"default" : 40,
+			"append" : "edt_append_ms",
+			"required" : true,
+			"options": {
+				"dependencies": {
+					"type": ["PredictiveSpring"]
+				}
+			},
+			"propertyOrder" : 11
 		},
 		"antiFlickeringFilter" :
 		{
@@ -184,7 +221,7 @@
 			"title" : "edt_conf_smooth_antiFlickeringFilter_title",
 			"default" : true,
 			"required" : true,
-			"propertyOrder" : 10
+			"propertyOrder" : 12
 		},
 		"continuousOutput" :
 		{
@@ -193,7 +230,7 @@
 			"title" : "edt_conf_smooth_continuousOutput_title",
 			"default" : false,
 			"required" : true,
-			"propertyOrder" : 11
+			"propertyOrder" : 13
 		}
 	},
 	"additionalProperties" : false
