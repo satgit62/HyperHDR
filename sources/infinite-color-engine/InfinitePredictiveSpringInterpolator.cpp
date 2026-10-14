@@ -32,6 +32,13 @@ void InfinitePredictiveSpringInterpolator::setSpringiness(float stiffness, float
 	_damping   = std::max(0.1f, damping);
 }
 
+void InfinitePredictiveSpringInterpolator::setLookahead(float lookaheadMs)
+{
+	// Clamp to a sane range. 0 disables the anticipation, 200 ms is already
+	// extremely aggressive and will cause visible overshoot on fast cuts.
+	_lookaheadSec = std::clamp(lookaheadMs, 0.0f, 200.0f) * 0.001f;
+}
+
 void InfinitePredictiveSpringInterpolator::resetState()
 {
 	_isAnimationComplete = true;
@@ -125,10 +132,11 @@ void InfinitePredictiveSpringInterpolator::test()
 {
 	InfinitePredictiveSpringInterpolator interp;
 	interp.setTransitionDuration(150.0f);
+	interp.setLookahead(40.0f);
 	interp.resetToColors({ {0,0,0} }, 0);
 	interp.setTargetColors({ {1,0,0} }, 0);
 
-	std::cout << "Predictive Spring test:\n";
+	std::cout << "Predictive Spring test (lookahead = 40 ms):\n";
 	for (long long t = 0; t <= 500; t += 50)
 	{
 		interp.updateCurrentColors(t, 0.0f);

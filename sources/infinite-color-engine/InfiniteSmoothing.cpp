@@ -56,6 +56,7 @@
 #include <infinite-color-engine/InfinitePredictiveSpringInterpolator.h>
 #include <infinite-color-engine/InfiniteMedianEmaInterpolator.h>
 #include <infinite-color-engine/InfinitePerceptualInterpolator.h>
+#include <infinite-color-engine/InfiniteKineticInterpolator.h>
 #include <base/HyperHdrInstance.h>
 
 using namespace hyperhdr;
@@ -152,7 +153,9 @@ void InfiniteSmoothing::clearQueuedColors(bool deviceEnabled, bool restarting)
 			}
 			else if (cfg->type == SmoothingType::PredictiveSpring)
 			{
-				_interpolator = std::make_unique<InfinitePredictiveSpringInterpolator>();
+				auto p = std::make_unique<InfinitePredictiveSpringInterpolator>();
+				p->setLookahead(cfg->lookahead);
+				_interpolator = std::move(p);
 			}
 			else if (cfg->type == SmoothingType::MedianEma)
 			{
@@ -164,6 +167,13 @@ void InfiniteSmoothing::clearQueuedColors(bool deviceEnabled, bool restarting)
 				p->setSpatialSmoothing(cfg->spatialStrength);
 				_interpolator = std::move(p);
 			}
+			else if (cfg->type == SmoothingType::Kinetic)
+			{
+				auto p = std::make_unique<InfiniteKineticInterpolator>();
+				p->setChromaBoost(cfg->chromaBoost);
+				p->setSpatialStrength(cfg->spatialStrength);
+				_interpolator = std::move(p);
+			}			
 			else
 			{
 				_interpolator = std::make_unique<InfiniteStepperInterpolator>();
@@ -230,7 +240,9 @@ void InfiniteSmoothing::handleSignalInstanceSettingsChanged(settings::type type,
 			.stiffness = static_cast<float>(obj["stiffness"].toDouble(200)),
 			.damping = static_cast<float>(obj["damping"].toDouble(26)),
 			.y_limit = static_cast<float>(obj["y_limit"].toDouble()),
-			.spatialStrength = static_cast<float>(obj["spatialStrength"].toDouble(0.0))
+			.spatialStrength = static_cast<float>(obj["spatialStrength"].toDouble(0.0)),
+			.chromaBoost = static_cast<float>(obj["chromaBoost"].toDouble(0.20)),
+			.lookahead = static_cast<float>(obj["lookahead"].toDouble(40.0))
 			}
 		);
 
@@ -448,6 +460,8 @@ QString InfiniteSmoothing::EnumSmoothingTypeToString(SmoothingType type)
 		return QString("PredictiveSpring");
 	else if (type == SmoothingType::MedianEma)
 		return QString("MedianEma");
+	else if (type == SmoothingType::Kinetic)
+		return QString("Kinetic");
 
 	return QString("Stepper");
 }
@@ -476,6 +490,8 @@ InfiniteSmoothing::SmoothingType InfiniteSmoothing::StringToEnumSmoothingType(QS
 		return SmoothingType::PredictiveSpring;
 	else if (name == QString("MedianEma"))
 		return SmoothingType::MedianEma;
+	else if (name == QString("Kinetic"))
+		return SmoothingType::Kinetic;
 
 	return SmoothingType::Stepper;
 }
