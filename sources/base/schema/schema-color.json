@@ -9,9 +9,16 @@
 			"type" : "string",
 			"required" : true,
 			"title" : "edt_conf_color_imageToLedMappingType_title",
-			"enum" : ["advanced", "unicolor_mean"],
+			"enum" : ["advanced", "unicolor_mean", "dominant", "oklab", "kmeans", "multisample"],
 			"options" : {
-				"enum_titles" : ["edt_conf_enum_multicolor_advanced", "edt_conf_enum_unicolor_mean"]
+				"enum_titles" : [
+					"edt_conf_enum_multicolor_advanced",
+					"edt_conf_enum_unicolor_mean",
+					"edt_conf_enum_dominant",
+					"edt_conf_enum_oklab",
+					"edt_conf_enum_kmeans",
+					"edt_conf_enum_multisample"
+				]
 			},
 			"default"  : "advanced",
 			"propertyOrder" : 1
@@ -25,6 +32,108 @@
 			"required" : true,
 			"propertyOrder" : 2
 		},
+		"hueBins" :
+		{
+			"type" : "integer",
+			"format" : "stepper",
+			"step" : 1,
+			"title" : "edt_conf_mapping_hueBins_title",
+			"minimum" : 4,
+			"maximum" : 64,
+			"default" : 18,
+			"required" : true,
+			"options" : {
+				"dependencies" : {
+					"imageToLedMappingType" : ["dominant", "multisample"]
+				}
+			},
+			"propertyOrder" : 3
+		},
+		"neighborRadius" :
+		{
+			"type" : "integer",
+			"format" : "stepper",
+			"step" : 1,
+			"title" : "edt_conf_mapping_neighborRadius_title",
+			"minimum" : 0,
+			"maximum" : 4,
+			"default" : 1,
+			"required" : true,
+			"options" : {
+				"dependencies" : {
+					"imageToLedMappingType" : ["dominant", "multisample"]
+				}
+			},
+			"propertyOrder" : 4
+		},
+		"minSaturation" :
+		{
+			"type" : "number",
+			"format" : "stepper",
+			"step" : 0.05,
+			"title" : "edt_conf_mapping_minSaturation_title",
+			"minimum" : 0.0,
+			"maximum" : 1.0,
+			"default" : 0.15,
+			"required" : true,
+			"options" : {
+				"dependencies" : {
+					"imageToLedMappingType" : ["dominant", "multisample"]
+				}
+			},
+			"propertyOrder" : 5
+		},
+		"valueGamma" :
+		{
+			"type" : "number",
+			"format" : "stepper",
+			"step" : 0.05,
+			"title" : "edt_conf_mapping_valueGamma_title",
+			"minimum" : 0.0,
+			"maximum" : 2.0,
+			"default" : 0.80,
+			"required" : true,
+			"options" : {
+				"dependencies" : {
+					"imageToLedMappingType" : ["dominant", "multisample"]
+				}
+			},
+			"propertyOrder" : 6
+		},
+		"neutralWeight" :
+		{
+			"type" : "number",
+			"format" : "stepper",
+			"step" : 0.01,
+			"title" : "edt_conf_mapping_neutralWeight_title",
+			"minimum" : 0.0,
+			"maximum" : 1.0,
+			"default" : 0.05,
+			"required" : true,
+			"options" : {
+				"dependencies" : {
+					"imageToLedMappingType" : ["dominant", "multisample"]
+				}
+			},
+			"propertyOrder" : 7
+		},
+		"saturationWeight" :
+		{
+			"type" : "number",
+			"format" : "stepper",
+			"step" : 0.1,
+			"title" : "edt_conf_mapping_saturationWeight_title",
+			"minimum" : 0.0,
+			"maximum" : 10.0,
+			"default" : 2.0,
+			"required" : true,
+			"options" : {
+				"dependencies" : {
+					"imageToLedMappingType" : ["dominant", "multisample"]
+				}
+			},
+			"propertyOrder" : 8
+		},
 		"channelAdjustment" :
 		{
 			"type" : "array",
@@ -32,7 +141,7 @@
 			"minItems": 1,
 			"maxItems": 1,
 			"required" : true,
-			"propertyOrder" : 3,
+			"propertyOrder" : 9,
 			"items" :
 			{
 				"type" : "object",
@@ -286,7 +395,7 @@
 						"required" : true,
 						"minimum" : 0.1,
 						"maximum": 100.0,
-						"default" : 1.5,						
+						"default" : 1.5,
 						"propertyOrder" : 19
 					},
 					"luminanceGain" :
@@ -310,7 +419,7 @@
 						"required" : true,
 						"minimum" : 0,
 						"maximum": 10,
-						"default" : 1,						
+						"default" : 1,
 						"propertyOrder" : 23
 					},
 					"backlightThreshold" :
