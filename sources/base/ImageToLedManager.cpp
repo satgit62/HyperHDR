@@ -15,7 +15,7 @@
 *
 *  The above copyright notice and this permission notice shall be included in all
 *  copies or substantial portions of the Software.
-
+*
 *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -49,28 +49,36 @@ void ImageToLedManager::registerProcessingUnit(
 			horizontalBorder,
 			verticalBorder,
 			_instanceIndex,
-			_ledString.leds());
+			_ledString.leds(),
+			_mappingParams);
 	else
 		_colorAveraging = nullptr;
 }
 
-
-// global transform method
+// Global transform method
 int ImageToLedManager::mappingTypeToInt(const QString& mappingType)
 {
-	if (mappingType == "unicolor_mean")
-		return 1;
+	if (mappingType == "unicolor_mean") return 1;
+	if (mappingType == "dominant")      return 2;
+	if (mappingType == "oklab")         return 3;
+	if (mappingType == "kmeans")        return 4;
+	if (mappingType == "multisample")   return 5;
 
 	return 0;
 }
-// global transform method
+
+// Global transform method
 QString ImageToLedManager::mappingTypeToStr(int mappingType)
 {
-
-	if (mappingType == 1)
-		return "unicolor_mean";
-
-	return "advanced";
+	switch (mappingType)
+	{
+		case 1: return "unicolor_mean";
+		case 2: return "dominant";
+		case 3: return "oklab";
+		case 4: return "kmeans";
+		case 5: return "multisample";
+		default: return "advanced";
+	}
 }
 
 ImageToLedManager::ImageToLedManager(const LedString& ledString, HyperHdrInstance* hyperhdr)
@@ -82,6 +90,7 @@ ImageToLedManager::ImageToLedManager(const LedString& ledString, HyperHdrInstanc
 	, _colorAveraging(nullptr)
 	, _mappingType(0)
 	, _sparseProcessing(false)
+	, _mappingParams()
 {
 	// init
 	handleSettingsUpdate(settings::type::COLOR, hyperhdr->getSetting(settings::type::COLOR));
@@ -97,11 +106,32 @@ void ImageToLedManager::handleSettingsUpdate(settings::type type, const QJsonDoc
 	if (type == settings::type::COLOR)
 	{
 		const QJsonObject& obj = config.object();
+
 		int newType = mappingTypeToInt(obj["imageToLedMappingType"].toString());
 		setLedMappingType(newType);
 
 		bool newSparse = obj["sparse_processing"].toBool(false);
 		setSparseProcessing(newSparse);
+
+		// Read the tunable parameters used by the dominant/oklab/kmeans/
+		// multisample mapping types. Defaults match schema-color.json.
+		MappingParams newParams;
+		newParams.hueBins          = obj["hueBins"].toInt(18);
+		newParams.neighborRadius   = obj["neighborRadius"].toInt(1);
+		newParams.minSaturation    = static_cast<float>(obj["minSaturation"].toDouble(0.15));
+		newParams.valueGamma       = static_cast<float>(obj["valueGamma"].toDouble(0.80));
+		newParams.neutralWeight    = static_cast<float>(obj["neutralWeight"].toDouble(0.05));
+		newParams.saturationWeight = static_cast<float>(obj["saturationWeight"].toDouble(2.0));
+
+		_mappingParams = newParams;
+
+		// Rebuild the averaging unit so the new parameters take effect
+		if (_colorAveraging != nullptr)
+		{
+			unsigned width  = _colorAveraging->width();
+			unsigned height = _colorAveraging->height();
+			registerProcessingUnit(width, height, 0, 0);
+		}
 	}
 }
 
@@ -144,7 +174,7 @@ bool ImageToLedManager::blackBorderDetectorEnabled() const
 
 void ImageToLedManager::processFrame(std::vector<float3>& ledColors, const Image<ColorRgb>& frameBuffer)
 {
-	setSize(frameBuffer);;
+	setSize(frameBuffer);
 	verifyBorder(frameBuffer);
 
 	if (_colorAveraging != nullptr && _colorAveraging->width() == frameBuffer.width() && _colorAveraging->height() == frameBuffer.height())
