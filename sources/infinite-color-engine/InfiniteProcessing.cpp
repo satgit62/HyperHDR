@@ -588,15 +588,42 @@ void InfiniteProcessing::applyBrightnessAndSaturation(linalg::vec<float, 3>& col
 	if (!_brightness.has_value() || !_saturation.has_value())
 		return;
 
-	linalg::vec<float, 3> hsv = ColorSpaceMath::rgb2hsv(color);
+	// Quick exit: If the color is practically black, do not touch it!
+	// This prevents Oklab from generating tiny noise that Gamma 0.7 would amplify.
+	if (color.x < 1e-5f && color.y < 1e-5f && color.z < 1e-5f)
+		return;
 
-	hsv.z *= _brightness.value();
-	hsv.y *= _saturation.value();
+	// 1. sRGB -> Linear RGB
+	float3 linear = srgbNonlinearToLinear(color);
 
-	hsv.z = std::min(hsv.z, 1.0f);
-	hsv.y = std::min(hsv.y, 1.0f);
+	// Clamp to prevent tiny negative values from breaking ufast_cbrt inside Oklab
+	linear = linalg::clamp(linear, 0.0f, 1.0f);
 
-	color = linalg::clamp(ColorSpaceMath::hsv2rgb(hsv), 0.0f, 1.0f);
+	// 2. Linear RGB -> Oklab
+	float3 oklab = ColorSpaceMath::linear_rgb_to_oklab(linear);
+
+	// 3. Scale Lightness (L) and Saturation (a, b).
+	oklab.x *= _brightness.value();   // L (Lightness)
+	oklab.y *= _saturation.value();   // a (green-red axis)
+	oklab.z *= _saturation.value();   // b (blue-yellow axis)
+
+	// Safety clamp: Lightness cannot be negative
+	oklab.x = std::max(oklab.x, 0.0f);
+
+	// 4. Back to Linear RGB
+	linear = ColorSpaceMath::oklab_to_linear_rgb(oklab);
+
+	// 5. Fast check: did the color go out of the displayable gamut?
+	if (linear.x < 0.0f || linear.x > 1.0f ||
+		linear.y < 0.0f || linear.y > 1.0f ||
+		linear.z < 0.0f || linear.z > 1.0f)
+	{
+		oklab = ColorSpaceMath::clamp_oklab_chroma_to_gamut(oklab);
+		linear = ColorSpaceMath::oklab_to_linear_rgb(oklab);
+	}
+
+	// 6. Back to sRGB and final clamp
+	color = linalg::clamp(srgbLinearToNonlinear(linear), 0.0f, 1.0f);
 }
 
 

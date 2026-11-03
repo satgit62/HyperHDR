@@ -437,6 +437,7 @@ namespace ColorSpaceMath
 
 	inline float ufast_cbrt(float x)
 	{
+		if (x <= 0.0f) return 0.0f;
 		union {
 			int i;
 			float f;
