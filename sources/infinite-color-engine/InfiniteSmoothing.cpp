@@ -57,6 +57,7 @@
 #include <infinite-color-engine/InfiniteMedianEmaInterpolator.h>
 #include <infinite-color-engine/InfinitePerceptualInterpolator.h>
 #include <infinite-color-engine/InfiniteKineticInterpolator.h>
+#include <infinite-color-engine/InfiniteFluidInterpolator.h>
 #include <base/HyperHdrInstance.h>
 
 using namespace hyperhdr;
@@ -173,7 +174,13 @@ void InfiniteSmoothing::clearQueuedColors(bool deviceEnabled, bool restarting)
 				p->setChromaBoost(cfg->chromaBoost);
 				p->setSpatialStrength(cfg->spatialStrength);
 				_interpolator = std::move(p);
-			}			
+			}
+			else if (cfg->type == SmoothingType::FluidInterpolator)
+			{
+				auto p = std::make_unique<InfiniteFluidInterpolator>();
+				p->setSpatialStrength(cfg->spatialStrength);
+				_interpolator = std::move(p);
+			}
 			else
 			{
 				_interpolator = std::make_unique<InfiniteStepperInterpolator>();
@@ -462,6 +469,8 @@ QString InfiniteSmoothing::EnumSmoothingTypeToString(SmoothingType type)
 		return QString("MedianEma");
 	else if (type == SmoothingType::Kinetic)
 		return QString("Kinetic");
+	else if (type == SmoothingType::FluidInterpolator)
+		return QString("Fluid");
 
 	return QString("Stepper");
 }
@@ -492,7 +501,8 @@ InfiniteSmoothing::SmoothingType InfiniteSmoothing::StringToEnumSmoothingType(QS
 		return SmoothingType::MedianEma;
 	else if (name == QString("Kinetic"))
 		return SmoothingType::Kinetic;
-
+	else if (name == QString("Fluid"))
+		return SmoothingType::FluidInterpolator;
 	return SmoothingType::Stepper;
 }
 
