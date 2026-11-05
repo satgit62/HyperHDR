@@ -54,7 +54,7 @@ public slots:
 
 private slots:
 	void updateLeds();
-	
+
 private:
 	void queueColors(SharedOutputColors&& nonlinearRgbLedColors);
 	void clearQueuedColors(bool deviceEnabled = false, bool restarting = false);
@@ -80,7 +80,8 @@ private:
 		LumaChroma = 9,
 		PredictiveSpring = 10,
 		MedianEma = 11,
-		Kinetic = 12
+		Kinetic = 12,
+		FluidInterpolator
 	};
 	static QString EnumSmoothingTypeToString(SmoothingType type);
 	static SmoothingType StringToEnumSmoothingType(QString name);
