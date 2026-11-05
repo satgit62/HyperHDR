@@ -449,14 +449,22 @@ namespace ColorSpaceMath
 		y = y - (y - x / (y * y)) / 3.0f;
 		return y;
 	}
-	
+
+	inline float safe_cbrt(float x)
+	{
+		return std::cbrt(std::max(x, 0.0f));
+	}
+
 	float3 linear_rgb_to_oklab(const float3& rgb)
 	{
 		float3 lms = mul(oklabM1, rgb);
 		float3 lms_cbrt = {
-			ufast_cbrt(lms.x),
-			ufast_cbrt(lms.y),
-			ufast_cbrt(lms.z)
+			//safe_cbrt(lms.x),
+			//safe_cbrt(lms.y),
+			//safe_cbrt(lms.z)
+			std::cbrt(lms.x),
+			std::cbrt(lms.y),
+			std::cbrt(lms.z)
 		};
 		return mul(oklabM2, lms_cbrt);
 	}
@@ -471,10 +479,10 @@ namespace ColorSpaceMath
 		};
 		return mul(oklabInvM1, lms);
 	}
-	
+
 	float3 clamp_oklab_chroma_to_gamut(const float3& oklab)
 	{
-		float L = oklab.x;
+		float L = std::clamp(oklab.x, 0.0f, 1.0f);
 		float a = oklab.y;
 		float b = oklab.z;
 
@@ -554,8 +562,8 @@ namespace ColorSpaceMath
 			<< rgb_max_error.y * 255.0f << ", "
 			<< rgb_max_error.z * 255.0f << ")\n";
 
-		
-		std::cout << "-----------------------------------------\n";		
+
+		std::cout << "-----------------------------------------\n";
 		auto approx_equal = [](const float3& a, const float3& b, float tol = 1e-4f) {
 			for (int i = 0; i < 3; ++i) {
 				if (std::fabs(a[i] - b[i]) > tol) return false;
