@@ -495,6 +495,28 @@ void ImageColorAveraging::getOklabForLeds(std::vector<float3>& ledColors, const 
 	{
 		ledColors.push_back(calcOklabForLeds(image, colors));
 	}
+	// --- NEW: Spatial smoothing along the LED strip ---
+	// The zonal Oklab average only handles colors inside a zone. To get
+	// a continuous, "fluid" look (like HyperDRM), we blur the resulting
+	// colors along the LED strip.
+	if (ledColors.size() > 2)
+	{
+		std::vector<float3> tmp = ledColors;
+		const float strength = 0.35f; // Adjustable: 0.0 to 0.5
+		
+		// Edge cases
+		tmp[0] = ledColors[0] * (1.0f - strength) + ledColors[1] * strength;
+		tmp[ledColors.size() - 1] = ledColors[ledColors.size() - 1] * (1.0f - strength) 
+		                          + ledColors[ledColors.size() - 2] * strength;
+		
+		// Middle LEDs
+		for (size_t i = 1; i + 1 < ledColors.size(); ++i)
+		{
+			tmp[i] = ledColors[i] * (1.0f - strength) 
+			       + (ledColors[i - 1] + ledColors[i + 1]) * (0.5f * strength);
+		}
+		ledColors = std::move(tmp);
+	}	
 }
 
 float3 ImageColorAveraging::calcOklabForLeds(const Image<ColorRgb>& image, const std::vector<uint32_t>& colors) const
