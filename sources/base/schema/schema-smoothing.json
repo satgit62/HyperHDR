@@ -21,7 +21,7 @@
 				"HybridInterpolator", "HybridRgbInterpolator",
 				"ExponentialInterpolator", "PerceptualInterpolator",
 				"AdaptiveEma", "Kalman", "LumaChroma",
-				"PredictiveSpring", "MedianEma", "Kinetic"
+				"PredictiveSpring", "MedianEma", "Kinetic", "Fluid"
 			],
 			"default" : "HybridRgbInterpolator",
 			"options" : {
@@ -38,7 +38,8 @@
 					"edt_conf_enum_interpolator_LumaChroma_title",
 					"edt_conf_enum_interpolator_PredictiveSpring_title",
 					"edt_conf_enum_interpolator_MedianEma_title",
-					"edt_conf_enum_interpolator_Kinetic_title"
+					"edt_conf_enum_interpolator_Kinetic_title",
+					"edt_conf_enum_interpolator_Fluid_title"
 				]
 			},
 			"required" : true,
@@ -174,7 +175,7 @@
 			"required" : true,
 			"options": {
 				"dependencies": {
-					"type": ["PerceptualInterpolator", "Kinetic"]
+					"type": ["PerceptualInterpolator", "Kinetic",  "Fluid"]
 				}
 			},
 			"propertyOrder" : 9
